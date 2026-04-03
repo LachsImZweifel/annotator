@@ -10,6 +10,7 @@ class AnnotationView(QGraphicsView):
         super().__init__(scene, parent)
         self._scene = scene
         self._frame_obj = None
+        self._click_task = self._zoom
 
     def set_image(self, image_data):
         q_img = QImage(
@@ -24,8 +25,13 @@ class AnnotationView(QGraphicsView):
         self.frame_obj = self._scene.addPixmap(pixmap)
         self.update_image_scale(self.frame_obj)
 
-    def _zoom_in(self, factor=5):
+    def _zoom(self, coordinates: QPointF, factor=5):
         self.scale(factor, factor)
+        self.centerOn(coordinates)
+        self._click_task = self._emit_click
+
+    def _emit_click(self, coordinates: QPointF):
+        self.point_clicked.emit(coordinates)
 
     def update_image_scale(self, frame_obj):
         if frame_obj:
@@ -36,8 +42,6 @@ class AnnotationView(QGraphicsView):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            # Umrechnung von Monitor-Pixel zu Bild-Pixel
-            scene_pos = self.mapToScene(event.pos())
-            self.point_clicked.emit(scene_pos)
+            self._click_task(self.mapToScene(event.pos()))
 
         super().mousePressEvent(event)
