@@ -25,12 +25,12 @@ class AnnotationController:
     def _next_image(self):
         image = self._data_handler.next_image()
         if image is not None:
-            self._gui.display_image(image)
+            self._gui.set_image(image)
 
     def _previous_image(self):
         image = self._data_handler.previous_image()
         if image is not None:
-            self._gui.display_image(image)
+            self._gui.set_image(image)
 
     def _set_keypoint(self, coordinates: tuple):
         print(f"Keypoint gesetzt bei: {coordinates}")

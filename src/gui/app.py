@@ -30,25 +30,11 @@ class App(QMainWindow):
         self.frame_obj = None
         self._shortcuts()
 
-    ########### Custom methods ###########
-    def display_image(self, image_data: ImageData):
-        q_img = QImage(
-            image_data.data,
-            image_data.width,
-            image_data.height,
-            image_data.bytes_per_line,
-            QImage.Format.Format_RGB888
-        )
-        pixmap = QPixmap.fromImage(q_img)
-        self._scene.clear()
-        self.frame_obj = self._scene.addPixmap(pixmap)
-        self._view._update_image_scale(self.frame_obj)
-
     ########## Event handlers ##########
     def resizeEvent(self, event):
         super().resizeEvent(event)
         # Aufruf der Methode in der View
-        self._view._update_image_scale(self.frame_obj)
+        self._view.update_image_scale(self.frame_obj)
 
     def _shortcuts(self):
         # RIGHT KEY
@@ -59,5 +45,10 @@ class App(QMainWindow):
         self.prev_shortcut = QShortcut(Qt.Key.Key_Left, self)
         self.prev_shortcut.activated.connect(self.prev_img.emit)
 
+    ########### Signal handlers ##########
     def _point_clicked(self, scene_pos):
         self.point_clicked.emit(scene_pos)
+
+    ########### Function Calls ##########
+    def set_image(self, image_data: ImageData):
+        self._view.set_image(image_data)
