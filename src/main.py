@@ -1,7 +1,7 @@
 import argparse
 import os
 import sys
-from src.AnnotationController import AnnotationController
+from src.annotation_controller import AnnotationController
 
 def main():
     parser = argparse.ArgumentParser(description='Annotator - A tool for annotating human pose datasets.')

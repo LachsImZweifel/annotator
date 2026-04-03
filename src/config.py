@@ -1,6 +1,16 @@
 import pathlib
+from collections import OrderedDict
+from typing import Tuple
 
 BASE_DIR = pathlib.Path(__file__).parent.parent.resolve()
+
+#Annotation Constants
+KEYPOINTS= [
+    "head", "left_shoulder", "left_elbow", "left_hand",
+    "right_shoulder", "right_elbow", "right_hand",
+    "left_hip", "left_knee", "left_foot",
+    "right_hip", "right_knee", "right_foot"
+]
 
 #Library Constants
 SUPPORTED_FORMATS = {
