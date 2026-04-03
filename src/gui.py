@@ -5,24 +5,25 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from src.utils.image_data import ImageData
 
 class Gui(QMainWindow):
-    next_requested: pyqtSignal = pyqtSignal()
+    next_img: pyqtSignal = pyqtSignal()
+    prev_img: pyqtSignal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
-        self.scene = QGraphicsScene()
-        self.view = QGraphicsView(self.scene)
-        self.configure_window()
+        self._scene = QGraphicsScene()
+        self._view = QGraphicsView(self._scene)
+        self._configure_window()
 
         self.frame_obj = None
 
-        self.shortcuts()
+        self._shortcuts()
 
 
     ########### Custom methods ###########
-    def configure_window(self):
+    def _configure_window(self):
         self.setWindowTitle("Annotator")
         self.resize(800, 600)
-        self.setCentralWidget(self.view)
+        self.setCentralWidget(self._view)
 
     def display_image(self, image_data: ImageData):
         q_img = QImage(
@@ -33,23 +34,27 @@ class Gui(QMainWindow):
             QImage.Format.Format_RGB888
         )
         pixmap = QPixmap.fromImage(q_img)
-        self.scene.clear()
-        self.frame_obj = self.scene.addPixmap(pixmap)
+        self._scene.clear()
+        self.frame_obj = self._scene.addPixmap(pixmap)
 
     ########## Event handlers ##########
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        self.update_image_scale()
+        self._update_image_scale()
 
-    def update_image_scale(self):
+    def _update_image_scale(self):
         if self.frame_obj:
-            self.view.fitInView(
+            self._view.fitInView(
                 self.frame_obj,
                 Qt.AspectRatioMode.KeepAspectRatio
             )
 
-    def shortcuts(self):
+    def _shortcuts(self):
         # RIGHT KEY
         self.next_shortcut = QShortcut(Qt.Key.Key_Right, self)
         self.next_shortcut.activated.connect(lambda: print("GUI-Shortcut: RECHTS erkannt!"))
-        self.next_shortcut.activated.connect(self.next_requested.emit)
+        self.next_shortcut.activated.connect(self.next_img.emit)
+        # LEFT KEY
+        self.prev_shortcut = QShortcut(Qt.Key.Key_Left, self)
+        self.prev_shortcut.activated.connect(lambda: print("GUI-Shortcut: LINKS erkannt!"))
+        self.prev_shortcut.activated.connect(self.prev_img.emit)

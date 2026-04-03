@@ -3,7 +3,7 @@ import pathlib
 BASE_DIR = pathlib.Path(__file__).parent.parent.resolve()
 
 #Library Constants
-SUPPORTED_FORMATS = [
+SUPPORTED_FORMATS = {
         '.jpg', '.jpeg', '.jpe',        # JPEG Formate
         '.png',                         # Portable Network Graphics
         '.bmp', '.dib',                 # Windows Bitmaps
@@ -13,4 +13,4 @@ SUPPORTED_FORMATS = [
         '.pbm', '.pgm', '.ppm', '.pxm', # Portable Messwerte
         '.sr', '.ras',                  # Sun Rasters
         '.hdr', '.pic'                  # HDR Formate
-    ]
+}
