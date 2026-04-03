@@ -32,7 +32,7 @@ class AnnotationView(QGraphicsView):
     def _zoom(self, coordinates: QPointF, factor=10):
         self.scale(factor, factor)
         self.centerOn(coordinates)
-        self._click_task = self._emit_click
+        self.switch_task("click")
 
     def update_image_scale(self, frame_obj):
         if frame_obj:
@@ -40,6 +40,10 @@ class AnnotationView(QGraphicsView):
                 frame_obj,
                 Qt.AspectRatioMode.KeepAspectRatio
             )
+
+    def switch_task(self, task: str):
+        tasks = { "zoom": self._zoom , "click": self._emit_click }
+        self._click_task = tasks[task]
 
     ####### Signal handlers #######
     def _emit_click(self, coordinates: QPointF):

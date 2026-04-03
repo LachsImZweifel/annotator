@@ -19,13 +19,13 @@ class App(QMainWindow):
 
         # Graphics Scene configuration
         self._scene = QGraphicsScene()
-        self._view = AnnotationView(self._scene)
+        self._annotation_view = AnnotationView(self._scene)
 
         # Layout configuration
-        self.setCentralWidget(self._view)
+        self.setCentralWidget(self._annotation_view)
 
         # Signals
-        self._view.point_clicked.connect(self._point_clicked)
+        self._annotation_view.point_clicked.connect(self._point_clicked)
 
         self.frame_obj = None
         self._shortcuts()
@@ -34,16 +34,18 @@ class App(QMainWindow):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         # Aufruf der Methode in der View
-        self._view.update_image_scale(self.frame_obj)
+        self._annotation_view.update_image_scale(self.frame_obj)
 
     def _shortcuts(self):
         # RIGHT KEY
         self.next_shortcut = QShortcut(Qt.Key.Key_Right, self)
         self.next_shortcut.activated.connect(self.next_img.emit)
+        self.next_shortcut.activated.connect(lambda: self._annotation_view.switch_task("zoom"))
 
         # LEFT KEY
         self.prev_shortcut = QShortcut(Qt.Key.Key_Left, self)
         self.prev_shortcut.activated.connect(self.prev_img.emit)
+        self.next_shortcut.activated.connect(lambda: self._annotation_view.switch_task("zoom"))
 
     ########### Signal handlers ##########
     def _point_clicked(self, scene_pos):
@@ -51,4 +53,4 @@ class App(QMainWindow):
 
     ########### Function Calls ##########
     def set_image(self, image_data: ImageData):
-        self._view.set_image(image_data)
+        self._annotation_view.set_image(image_data)
