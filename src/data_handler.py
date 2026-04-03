@@ -38,7 +38,7 @@ class DataHandler:
             image_rgb = next(self.source)
         except StopIteration:
             return None
-
+        print("Load next frame")
         height, width, channels = image_rgb.shape
         bytes_per_line = channels * width
 

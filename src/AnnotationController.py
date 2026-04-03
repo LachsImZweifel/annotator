@@ -11,6 +11,9 @@ class AnnotationController:
         self.data_handler = DataHandler(data_path, video_mode)
         self.gui = Gui()
 
+        # Signals
+        self.gui.next_requested.connect(self.next_frame)
+
         self.next_frame()
         self.run_gui()
 

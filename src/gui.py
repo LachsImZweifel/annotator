@@ -1,23 +1,29 @@
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene, QMainWindow
-from PyQt6.QtGui import QPixmap, QImage
-from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QImage, QKeySequence, QShortcut
+from PyQt6.QtCore import Qt, pyqtSignal
 
 from src.utils.image_data import ImageData
 
 class Gui(QMainWindow):
+    next_requested: pyqtSignal = pyqtSignal()
+
     def __init__(self):
         super().__init__()
-        # Window configuration
-        self.setWindowTitle("Annotator")
-        self.resize(800, 600)
-
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(self.scene)
-        self.setCentralWidget(self.view)
+        self.configure_window()
 
         self.frame_obj = None
 
+        self.shortcuts()
+
+
     ########### Custom methods ###########
+    def configure_window(self):
+        self.setWindowTitle("Annotator")
+        self.resize(800, 600)
+        self.setCentralWidget(self.view)
+
     def display_image(self, image_data: ImageData):
         q_img = QImage(
             image_data.data,
@@ -42,3 +48,8 @@ class Gui(QMainWindow):
                 Qt.AspectRatioMode.KeepAspectRatio
             )
 
+    def shortcuts(self):
+        # RIGHT KEY
+        self.next_shortcut = QShortcut(Qt.Key.Key_Right, self)
+        self.next_shortcut.activated.connect(lambda: print("GUI-Shortcut: RECHTS erkannt!"))
+        self.next_shortcut.activated.connect(self.next_requested.emit)
