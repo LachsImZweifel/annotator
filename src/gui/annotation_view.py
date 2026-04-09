@@ -33,7 +33,6 @@ class AnnotationView(QGraphicsView):
     def _zoom(self, coordinates: QPointF, factor=10):
         self.scale(factor, factor)
         self.centerOn(coordinates)
-        self.switch_task("click")
 
     def update_image_scale(self, frame_obj):
         if frame_obj:
@@ -41,10 +40,6 @@ class AnnotationView(QGraphicsView):
                 frame_obj,
                 Qt.AspectRatioMode.KeepAspectRatio
             )
-
-    def switch_task(self, task: str):
-        tasks = { "zoom": self._zoom , "click": self._emit_click }
-        self._click_task = tasks[task]
 
     ####### Signal handlers #######
     def _emit_click(self, coordinates: QPointF):
@@ -54,13 +49,13 @@ class AnnotationView(QGraphicsView):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-                # Panning with Ctrl + Left Mouse Button
-                self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
-                super().mousePressEvent(event)
-            else:
                 # Set Keypoint
                 self.setDragMode(QGraphicsView.DragMode.NoDrag)
-                self._click_task(self.mapToScene(event.pos()))
+                self._emit_click(self.mapToScene(event.pos()))  # TODO redundant? Use signal directly?
+            else:
+                if self.transform().m11() < 1.01: self._zoom(self.mapToScene(event.pos()))
+                self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+                super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
         # Sobald die Taste losgelassen wird, deaktivieren wir den Drag-Modus wieder
