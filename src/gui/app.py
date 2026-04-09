@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QGraphicsScene, QMainWindow
-from PyQt6.QtGui import QImage, QPixmap, QShortcut
+from PyQt6.QtGui import QShortcut
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 
 from src.data_handler import ImageData

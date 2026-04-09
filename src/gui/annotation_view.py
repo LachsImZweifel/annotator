@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
-from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtGui import QImage, QPixmap, QMouseEvent
 from PyQt6.QtWidgets import QGraphicsView
 
 
@@ -27,6 +27,7 @@ class AnnotationView(QGraphicsView):
         pixmap = QPixmap.fromImage(q_img)
         self._scene.clear()
         self.frame_obj = self._scene.addPixmap(pixmap)
+        self.setSceneRect(self.frame_obj.boundingRect())
         self.update_image_scale(self.frame_obj)
 
     def _zoom(self, coordinates: QPointF, factor=10):
@@ -52,9 +53,19 @@ class AnnotationView(QGraphicsView):
     ####### Event handlers #######
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self._click_task(self.mapToScene(event.pos()))
+            if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+                # Panning with Ctrl + Left Mouse Button
+                self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+                super().mousePressEvent(event)
+            else:
+                # Set Keypoint
+                self.setDragMode(QGraphicsView.DragMode.NoDrag)
+                self._click_task(self.mapToScene(event.pos()))
 
-        super().mousePressEvent(event)
+    def mouseReleaseEvent(self, event):
+        # Sobald die Taste losgelassen wird, deaktivieren wir den Drag-Modus wieder
+        self.setDragMode(QGraphicsView.DragMode.NoDrag)
+        super().mouseReleaseEvent(event)
 
     def wheelEvent(self, event):
         zoom_in_factor = 1.25
