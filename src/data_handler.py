@@ -3,7 +3,7 @@ from collections import deque
 from pathlib import Path
 
 from src.config import SUPPORTED_FORMATS as FORMATS
-from src.utils.image_data import ImageData
+from src.utils.custom_dataclasses import ImageGUI
 
 class DataHandler:
     def __init__(self, data_path:str, video_mode:bool=False):
@@ -52,4 +52,4 @@ class DataHandler:
         height, width, channels = image_rgb.shape
         bytes_per_line = channels * width
 
-        return ImageData(image_rgb.tobytes(), width, height, bytes_per_line, channels)
+        return ImageGUI(image_rgb.tobytes(), width, height, bytes_per_line, channels)

@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QGraphicsScene, QMainWindow
 from PyQt6.QtGui import QShortcut
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 
-from src.data_handler import ImageData
+from src.data_handler import ImageGUI
 from src.gui.annotation_view import AnnotationView
 
 
@@ -52,5 +52,5 @@ class App(QMainWindow):
         self.point_clicked.emit(scene_pos)
 
     ########### Function Calls ##########
-    def set_image(self, image_data: ImageData):
+    def set_image(self, image_data: ImageGUI):
         self._annotation_view.set_image(image_data)

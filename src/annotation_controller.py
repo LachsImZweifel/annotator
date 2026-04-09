@@ -1,14 +1,17 @@
 import sys
+from pathlib import Path
 from PyQt6.QtWidgets import QApplication
 
 from src.data_handler import DataHandler
+from src.annotation_cache import AnnotationCache
 from src.gui.app import App
 
 class AnnotationController:
-    def __init__(self, data_path:str, video_mode:bool=False):
+    def __init__(self, json_path:Path, data_path:Path, video_mode:bool=False):
         self._app = QApplication([])
         self._data_handler = DataHandler(data_path, video_mode)
         self._gui = App()
+        self._annotation_cache = AnnotationCache(json_path, data_path)
 
         # Signals
         self._gui.next_img.connect(self._next_image)
