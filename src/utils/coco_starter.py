@@ -1,10 +1,11 @@
 from datetime import date
+from typing import Dict, Any
 
-from src.config import KEYPOINTS, SKELETON
+from src.config import KEYPOINTS, SKELETON, LICENSE
 
 today = date.today()
 
-coco = {
+coco: Dict[str, Any] = {
     "info": {
         "description": "Schwimmer Keypoint Annotation – Beispieldatei",
         "version": "1.0",
@@ -13,13 +14,7 @@ coco = {
         "date_created": f"{today.year}-{today.month}-{today.day}"
       },
 
-    "licenses": [
-        {
-          "id": 1,
-          "name": "n/A",
-          "url": "<n/A"
-        }
-    ],
+    "licenses": [LICENSE],
 
     "categories": [
         {

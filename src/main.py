@@ -19,7 +19,7 @@ def main():
         print(f"Error: The path '{args.json_path}' does not exist!")
         sys.exit(1)
 
-    if not Path(args.json_path).exists():
+    if not Path(args.json_path).is_dir() and Path(args.json_path).suffix.lower() != '.json':
         print(f"Error: The path '{args.json_path}' is neither a directory nor a JSON file!")
         sys.exit(1)
 

@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QGraphicsScene, QMainWindow
 from PyQt6.QtGui import QShortcut
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 
-from src.data_handler import ImageGUI
+from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO
 from src.gui.annotation_view import AnnotationView
 
 
@@ -40,17 +40,15 @@ class App(QMainWindow):
         # RIGHT KEY
         self.next_shortcut = QShortcut(Qt.Key.Key_Right, self)
         self.next_shortcut.activated.connect(self.next_img.emit)
-        self.next_shortcut.activated.connect(lambda: self._annotation_view.switch_task("zoom"))
 
         # LEFT KEY
         self.prev_shortcut = QShortcut(Qt.Key.Key_Left, self)
         self.prev_shortcut.activated.connect(self.prev_img.emit)
-        self.next_shortcut.activated.connect(lambda: self._annotation_view.switch_task("zoom"))
 
     ########### Signal handlers ##########
     def _point_clicked(self, scene_pos):
         self.point_clicked.emit(scene_pos)
 
     ########### Function Calls ##########
-    def set_image(self, image_data: ImageGUI):
-        self._annotation_view.set_image(image_data)
+    def new_image(self, image_data: ImageGUI, keypoints: KeypointsCOCO):
+        self._annotation_view.new_image(image_data, keypoints)

@@ -1,5 +1,8 @@
-from dataclasses import dataclass
 from typing import Tuple, List
+from dataclasses import dataclass
+
+KeypointsCOCO = List[List[Tuple[int, int, int]]]
+
 
 @dataclass
 class ImageGUI:
