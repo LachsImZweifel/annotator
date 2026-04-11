@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Literal, Optional
 from PyQt6.QtWidgets import QApplication
 
 from src.input_handler import InputHandler
@@ -32,17 +31,8 @@ class AnnotationController:
         self._gui.show()
         sys.exit(self._app.exec())
 
-    def _on_next(self):
-        self._index += 1
-        self._new_image()
-
-    def _on_prev(self):
-        self._index -= 1
-        self._new_image()
-
-    def _on_get(self, index):
-        self._index = index
-        self._new_image()
+    def _set_index(self, index):
+        self._index = max(0, min(index, self._input_handler.total_frames))
 
     def _new_image(self):
         new_img = self._input_handler.new_image(self._index)
@@ -56,6 +46,19 @@ class AnnotationController:
 
     def _set_keypoint(self, coordinates: tuple):
         print(f"Keypoint gesetzt bei: {coordinates}")
+
+    ######## SIGNAL HANDLERS ########
+    def _on_next(self):
+        self._set_index(self._index + 1)
+        self._new_image()
+
+    def _on_prev(self):
+        self._set_index(self._index - 1)
+        self._new_image()
+
+    def _on_get(self, index):
+        self._set_index(index)
+        self._new_image()
 
 
 

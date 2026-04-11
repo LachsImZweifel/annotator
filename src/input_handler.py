@@ -44,7 +44,7 @@ class VideoSource:
 
     def get_frame(self, index: int) -> tuple[str, ndarray]:
         if index in self._cache:
-            return self._cache[index]
+            return self._filename, self._cache[index]
 
         self._video.set(cv2.CAP_PROP_POS_FRAMES, index)
         ret, frame = self._video.read()
