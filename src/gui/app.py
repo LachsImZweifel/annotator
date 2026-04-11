@@ -9,6 +9,7 @@ from src.gui.annotation_view import AnnotationView
 class App(QMainWindow):
     next_img: pyqtSignal = pyqtSignal()
     prev_img: pyqtSignal = pyqtSignal()
+    get_img: pyqtSignal = pyqtSignal(int) #TODO implement
     point_clicked: pyqtSignal = pyqtSignal(QPointF)
 
     def __init__(self):
