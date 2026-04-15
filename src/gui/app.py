@@ -11,6 +11,8 @@ class App(QMainWindow):
     prev_img: pyqtSignal = pyqtSignal()
     get_img: pyqtSignal = pyqtSignal(int) #TODO implement
     point_clicked: pyqtSignal = pyqtSignal(QPointF)
+    next_kp: pyqtSignal = pyqtSignal()
+    prev_kp: pyqtSignal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -39,12 +41,20 @@ class App(QMainWindow):
 
     def _shortcuts(self):
         # RIGHT KEY
-        self.next_shortcut = QShortcut(Qt.Key.Key_Right, self)
-        self.next_shortcut.activated.connect(self.next_img.emit)
+        self.next_img_shortcut = QShortcut(Qt.Key.Key_Right, self)
+        self.next_img_shortcut.activated.connect(self.next_img.emit)
 
         # LEFT KEY
-        self.prev_shortcut = QShortcut(Qt.Key.Key_Left, self)
-        self.prev_shortcut.activated.connect(self.prev_img.emit)
+        self.prev_img_shortcut = QShortcut(Qt.Key.Key_Left, self)
+        self.prev_img_shortcut.activated.connect(self.prev_img.emit)
+
+        # E Key
+        self.next_keypoint_shortcut = QShortcut(Qt.Key.Key_E, self)
+        self.next_keypoint_shortcut.activated.connect(self.next_kp.emit)
+
+        # Q KEY
+        self.next_keypoint_shortcut = QShortcut(Qt.Key.Key_E, self)
+        self.next_keypoint_shortcut.activated.connect(self.prev_kp.emit)
 
     ########### Signal handlers ##########
     def _point_clicked(self, scene_pos):

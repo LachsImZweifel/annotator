@@ -1,7 +1,8 @@
 from typing import Tuple, List, Literal
 from dataclasses import dataclass
 
-KeypointsCOCO = List[List[Tuple[int, int, int]]]
+SkeletonCOCO = List[Tuple[int, int, int]]
+KeypointsCOCO = List[SkeletonCOCO]
 
 Shapes = Literal["triangle_up", "triangle_down", "x", "text"]
 

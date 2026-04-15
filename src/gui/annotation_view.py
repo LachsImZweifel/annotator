@@ -2,8 +2,8 @@ from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsItemGroup
 
-from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO
-from src.utils.gui_toolkit import draw_keypoint, draw_symbol
+from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO, SkeletonCOCO
+from src.utils.gui_toolkit import draw_keypoint
 from src.config import KEYPOINT_SIZE
 
 
@@ -19,10 +19,6 @@ class AnnotationView(QGraphicsView):
         self._frame_obj = None
         self._click_task = self._zoom
         self._pan_start = None
-
-        # keypoint settings
-        self.keypoint_selected = 0
-        self.visibility_selected = 2
 
         # courser design
         self.cursor_follower = None
@@ -42,12 +38,8 @@ class AnnotationView(QGraphicsView):
             QImage.Format.Format_RGB888
         )
         pixmap = QPixmap.fromImage(q_img)
-
-        if self._frame_obj is None:
-            self._frame_obj = self._scene.addPixmap(pixmap)
-        else:
-            self._frame_obj.setPixmap(pixmap)
-
+        if self._frame_obj is None: self._frame_obj = self._scene.addPixmap(pixmap)
+        else: self._frame_obj.setPixmap(pixmap)
         self.setSceneRect(self._frame_obj.boundingRect())
         self.update_image_scale(self._frame_obj)
 
@@ -81,12 +73,6 @@ class AnnotationView(QGraphicsView):
         scale_y = viewport.height() / scene_rect.height()
         return min(scale_x, scale_y)
 
-    def _init_cursor_follower(self):
-        self.cursor_follower = QGraphicsItemGroup()
-        self._scene.addItem(self.cursor_follower)
-        self.cursor_follower.setZValue(1000)
-        self.cursor_follower.hide()
-
     ####### Signal handlers #######
     def _emit_click(self, coordinates: QPointF):
         self.point_clicked.emit(coordinates)
@@ -108,40 +94,6 @@ class AnnotationView(QGraphicsView):
         # Sobald die Taste losgelassen wird, deaktivieren wir den Drag-Modus wieder
         self.setDragMode(QGraphicsView.DragMode.NoDrag)
         super().mouseReleaseEvent(event)
-
-    def mouseMoveEvent(self, event):
-        scene_pos = self.mapToScene(event.pos())
-
-        if self.cursor_follower:
-            # 1. Alte Inhalte der Gruppe löschen
-            for item in self.cursor_follower.childItems():
-                self._scene.removeItem(item)
-
-            # 2. Neue Symbole/Texte generieren (deine Hilfsfunktionen)
-            # Wichtig: Wir zeichnen sie bei (0,0), da die Gruppe verschoben wird!
-            sym = draw_keypoint(
-                self.keypoint_selected,
-                (0, 0),
-                self.visibility_selected,
-                size=KEYPOINT_SIZE
-            )
-            txt = draw_symbol(
-                (0, 0),
-                "text",
-                size=KEYPOINT_SIZE,
-                color_code="#FFFFFF",
-                text=f"ID: {self.keypoint_selected}"
-            )
-
-            # 3. Der Gruppe hinzufügen
-            self.cursor_follower.addToGroup(sym)
-            self.cursor_follower.addToGroup(txt)
-
-            # 4. Gruppe an Mausposition bewegen und zeigen
-            self.cursor_follower.setPos(scene_pos)
-            self.cursor_follower.show()
-
-        super().mouseMoveEvent(event)
 
 
     def wheelEvent(self, event):

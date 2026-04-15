@@ -18,10 +18,12 @@ class AnnotationController:
         self._index = 0
 
         # Signals
-        self._gui.next_img.connect(self._on_next)
-        self._gui.prev_img.connect(self._on_prev)
-        self._gui.get_img.connect(self._on_get)
+        self._gui.next_img.connect(self._on_next_img)
+        self._gui.prev_img.connect(self._on_prev_img)
+        self._gui.get_img.connect(self._on_get_img)
         self._gui.point_clicked.connect(self._set_keypoint)
+        self._gui.next_kp.connect(self._on_next_kp)
+        self._gui.prev_kp.connect(self._on_prev_kp)
 
         # Run
         self._new_image()
@@ -48,17 +50,23 @@ class AnnotationController:
         print(f"Keypoint gesetzt bei: {coordinates}")
 
     ######## SIGNAL HANDLERS ########
-    def _on_next(self):
+    def _on_next_img(self):
         self._set_index(self._index + 1)
         self._new_image()
 
-    def _on_prev(self):
+    def _on_prev_img(self):
         self._set_index(self._index - 1)
         self._new_image()
 
-    def _on_get(self, index):
+    def _on_get_img(self, index):
         self._set_index(index)
         self._new_image()
+
+    def _on_next_kp(self):
+        print("Keypoint gesetzt bei (0,0)")
+
+    def _on_prev_kp(self):
+        print("Keypoint zurück")
 
 
 
