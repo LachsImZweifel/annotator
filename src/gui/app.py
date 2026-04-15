@@ -53,7 +53,7 @@ class App(QMainWindow):
         self.next_keypoint_shortcut.activated.connect(self.next_kp.emit)
 
         # Q KEY
-        self.next_keypoint_shortcut = QShortcut(Qt.Key.Key_E, self)
+        self.next_keypoint_shortcut = QShortcut(Qt.Key.Key_Q, self)
         self.next_keypoint_shortcut.activated.connect(self.prev_kp.emit)
 
     ########### Signal handlers ##########
