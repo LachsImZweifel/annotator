@@ -1,9 +1,10 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
-from PyQt6.QtGui import QImage, QPixmap, QColor, QPen, QBrush, QPainterPath, QPolygonF
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsPathItem
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsItemGroup
 
 from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO
-from src.config import KEYPOINT_COLORS, KEYPOINT_SIZE
+from src.utils.gui_toolkit import draw_keypoint, draw_symbol
+from src.config import KEYPOINT_SIZE
 
 
 class AnnotationView(QGraphicsView):
@@ -17,6 +18,15 @@ class AnnotationView(QGraphicsView):
         self._scene = scene
         self._frame_obj = None
         self._click_task = self._zoom
+        self._pan_start = None
+
+        # keypoint settings
+        self.keypoint_selected = 0
+        self.visibility_selected = 2
+
+        # courser design
+        self.cursor_follower = None
+        self.setCursor(Qt.CursorShape.CrossCursor)
 
     ####### Custom methods #######
     def new_image(self, image_data: ImageGUI, keypoints: KeypointsCOCO):
@@ -32,15 +42,24 @@ class AnnotationView(QGraphicsView):
             QImage.Format.Format_RGB888
         )
         pixmap = QPixmap.fromImage(q_img)
-        self._scene.clear()
-        self.frame_obj = self._scene.addPixmap(pixmap)
-        self.setSceneRect(self.frame_obj.boundingRect())
-        self.update_image_scale(self.frame_obj)
+
+        if self._frame_obj is None:
+            self._frame_obj = self._scene.addPixmap(pixmap)
+        else:
+            self._frame_obj.setPixmap(pixmap)
+
+        self.setSceneRect(self._frame_obj.boundingRect())
+        self.update_image_scale(self._frame_obj)
 
     def draw_keypoints(self, keypoints: KeypointsCOCO):
         for keypoint_list in keypoints:
             for i, keypoint in enumerate(keypoint_list):
-                self._scene.addItem(self._get_symbol(i, keypoint))
+                self._scene.addItem(draw_keypoint(
+                    i,
+                    (keypoint[0], keypoint[1]),
+                    visibility=keypoint[2],
+                    size=KEYPOINT_SIZE
+                ))
 
     def _zoom(self, coordinates: QPointF, factor=10):
         self.scale(factor, factor)
@@ -54,65 +73,19 @@ class AnnotationView(QGraphicsView):
             )
 
     def _get_fit_scale(self) -> float:
-        if not self.frame_obj:
+        if not self._frame_obj:
             return 1.0
         viewport = self.viewport().size()
-        scene_rect = self.frame_obj.boundingRect()
+        scene_rect = self._frame_obj.boundingRect()
         scale_x = viewport.width() / scene_rect.width()
         scale_y = viewport.height() / scene_rect.height()
         return min(scale_x, scale_y)
 
-
-    @staticmethod
-    def _get_symbol(index, keypoint: tuple[int, int, int]):
-
-        color_code = "#FFFFFF"
-        for color, indices in KEYPOINT_COLORS.items():
-            if index in indices:
-                color_code = color
-
-        color = QColor(color_code)
-        size = KEYPOINT_SIZE
-        path = QPainterPath()
-
-        x, y, visibility = keypoint
-        match visibility:
-            case 0:
-                # Not labeled / hidden: draw an X marker.
-                path.moveTo(x - size, y - size)
-                path.lineTo(x + size, y + size)
-                path.moveTo(x + size, y - size)
-                path.lineTo(x - size, y + size)
-            case 1:
-                # Labeled but not visible: triangle pointing down.
-                triangle = QPolygonF([
-                    QPointF(x, y + size),
-                    QPointF(x - size, y - size),
-                    QPointF(x + size, y - size),
-                ])
-                path.addPolygon(triangle)
-                path.closeSubpath()
-            case 2:
-                # Visible and labeled: triangle pointing up.
-                triangle = QPolygonF([
-                    QPointF(x, y - size),
-                    QPointF(x - size, y + size),
-                    QPointF(x + size, y + size),
-                ])
-                path.addPolygon(triangle)
-                path.closeSubpath()
-            case _:
-                raise ValueError(f"Wrong visibility value for keypoint: {visibility}")
-
-        symbol_item = QGraphicsPathItem(path)
-        if visibility in (1, 2):
-            symbol_item.setPen(QPen(Qt.PenStyle.NoPen))
-            symbol_item.setBrush(QBrush(color))
-        else:
-            pen = QPen(color)
-            pen.setWidth(2)
-            symbol_item.setPen(pen)
-        return symbol_item
+    def _init_cursor_follower(self):
+        self.cursor_follower = QGraphicsItemGroup()
+        self._scene.addItem(self.cursor_follower)
+        self.cursor_follower.setZValue(1000)
+        self.cursor_follower.hide()
 
     ####### Signal handlers #######
     def _emit_click(self, coordinates: QPointF):
@@ -121,9 +94,9 @@ class AnnotationView(QGraphicsView):
     ####### Event handlers #######
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
+            self.setDragMode(QGraphicsView.DragMode.NoDrag)
+            # Set Keypoints
             if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-                # Set Keypoint
-                self.setDragMode(QGraphicsView.DragMode.NoDrag)
                 self._emit_click(self.mapToScene(event.pos()))  # TODO redundant? Use signal directly?
             else:
                 if self.transform().m11() < self._get_fit_scale() * 1.01:
@@ -135,6 +108,41 @@ class AnnotationView(QGraphicsView):
         # Sobald die Taste losgelassen wird, deaktivieren wir den Drag-Modus wieder
         self.setDragMode(QGraphicsView.DragMode.NoDrag)
         super().mouseReleaseEvent(event)
+
+    def mouseMoveEvent(self, event):
+        scene_pos = self.mapToScene(event.pos())
+
+        if self.cursor_follower:
+            # 1. Alte Inhalte der Gruppe löschen
+            for item in self.cursor_follower.childItems():
+                self._scene.removeItem(item)
+
+            # 2. Neue Symbole/Texte generieren (deine Hilfsfunktionen)
+            # Wichtig: Wir zeichnen sie bei (0,0), da die Gruppe verschoben wird!
+            sym = draw_keypoint(
+                self.keypoint_selected,
+                (0, 0),
+                self.visibility_selected,
+                size=KEYPOINT_SIZE
+            )
+            txt = draw_symbol(
+                (0, 0),
+                "text",
+                size=KEYPOINT_SIZE,
+                color_code="#FFFFFF",
+                text=f"ID: {self.keypoint_selected}"
+            )
+
+            # 3. Der Gruppe hinzufügen
+            self.cursor_follower.addToGroup(sym)
+            self.cursor_follower.addToGroup(txt)
+
+            # 4. Gruppe an Mausposition bewegen und zeigen
+            self.cursor_follower.setPos(scene_pos)
+            self.cursor_follower.show()
+
+        super().mouseMoveEvent(event)
+
 
     def wheelEvent(self, event):
         zoom_in_factor = 1.25
