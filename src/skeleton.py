@@ -14,7 +14,6 @@ class Skeleton:
         self.keypoint_index = (self.keypoint_index + 1) % self.num_keypoints
         print("Keypoint saved: ", self.keypoints[self.keypoint_index - 1])
 
-
     def next_keypoint(self):
         if self.keypoints[self.keypoint_index] is None:
             self.keypoints[self.keypoint_index] = (0, 0, 0)
@@ -26,3 +25,15 @@ class Skeleton:
             self.keypoints[self.keypoint_index] = (0, 0, 0)
         self.keypoint_index = (self.keypoint_index - 1) % self.num_keypoints
         print("Prev Keypoint: ", self.keypoints[self.keypoint_index])
+
+    def remove_keypoint(self):
+        self.keypoints[self.keypoint_index] = None
+        print("Keypoint removed: ", self.keypoints[self.keypoint_index])
+
+
+    def finish(self):
+        self.keypoints = [
+            (0, 0, 0) if kp is None else kp
+            for kp in self.keypoints
+        ]
+

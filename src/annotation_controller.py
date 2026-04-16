@@ -17,7 +17,7 @@ class AnnotationController:
         self._gui = App()
         self._annotation_cache = AnnotationCache(json_path, data_path.name)
 
-        # Variables
+        # States & Variables
         self._img_index = 0
         self._skeleton_index = 0
         self._skeletons = []
@@ -26,12 +26,15 @@ class AnnotationController:
         self._gui.next_img.connect(self._on_next_img)
         self._gui.prev_img.connect(self._on_prev_img)
         self._gui.get_img.connect(self._on_get_img)
-        self._gui.point_clicked.connect(self._on_set_kp)
+        self._gui.set_kp.connect(self._on_set_kp)
         self._gui.next_kp.connect(self._on_next_kp)
         self._gui.prev_kp.connect(self._on_prev_kp)
+        self._gui.remove_kp.connect(self._on_remove_kp)
+
+        self._gui.skeleton_index.connect(self._on_skeleton_index)
 
         # Run
-        self._new_image()
+        self._handle_next()
         self._run_gui()
 
     def _run_gui(self):
@@ -41,50 +44,65 @@ class AnnotationController:
     def _set_index(self, index):
         self._img_index = max(0, min(index, self._input_handler.total_frames))
 
+    def _handle_next(self):
+        #save data
+        self._new_image()
+        self._load_image_data()
+
     def _new_image(self):
         new_img = self._input_handler.new_image(self._img_index)
         if new_img is not None:
             name, image = new_img
             self._annotation_cache.new_image(name, self._img_index, image)
-            keypoints = self._annotation_cache.get_keypoints()
-            self._gui.new_image(image, keypoints)
-            print(self._img_index)
-            print(keypoints)
+            self._gui.new_image(image)
 
-    def _create_skeleton(self) -> Skeleton:
+    def _load_image_data(self):
+        # if annotation_cache.load skeletons = None:
+        self._create_skeleton()
+        keypoints = self._annotation_cache.get_keypoints()
+        self._gui.new_data(keypoints)
+
+    def _create_skeleton(self):
         self._skeletons.append(Skeleton(len(self._skeletons), 1, len(KEYPOINTS)))
-        return self._skeletons[-1]
 
     ######## SIGNAL HANDLERS ########
     def _on_next_img(self):
         self._set_index(self._img_index + 1)
-        self._new_image()
+        self._handle_next()
 
     def _on_prev_img(self):
         self._set_index(self._img_index - 1)
-        self._new_image()
+        self._handle_next()
 
     def _on_get_img(self, index):
         self._set_index(index)
-        self._new_image()
+        self._handle_next()
 
     def _on_set_kp(self, keypoint: Keypoint):
-        try: self._skeletons[self._skeleton_index].set_keypoint(keypoint)
-        except IndexError:
-            self._create_skeleton().set_keypoint(keypoint)
+        self._skeletons[self._skeleton_index].set_keypoint(keypoint)
 
     def _on_next_kp(self):
-        try:
-            self._skeletons[self._skeleton_index].next_keypoint()
-        except IndexError:
-            self._create_skeleton().next_keypoint()
+        self._skeletons[self._skeleton_index].next_keypoint()
 
     def _on_prev_kp(self):
-        try:
-            self._skeletons[self._skeleton_index].prev_keypoint()
-        except IndexError:
-            self._create_skeleton().prev_keypoint()
+        self._skeletons[self._skeleton_index].prev_keypoint()
 
+    def _on_remove_kp(self):
+        self._skeletons[self._skeleton_index].remove_keypoint()
+
+    def _on_skeleton_index(self, index):
+        self._skeletons[self._skeleton_index].finish()
+
+        if index > self._skeleton_index + 1:
+            print("Index out of range")
+            pass
+        elif index == self._skeleton_index + 1:
+            print("Creating new skeleton")
+            self._skeleton_index = index
+            self._create_skeleton()
+        else:
+            print("Switching to existing skeleton")
+            self._skeleton_index = index
 
 
 

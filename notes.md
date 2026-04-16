@@ -7,8 +7,13 @@
 →  set Image (flexible)
 
 ### REFACTORING
-→ refactor toolkit
+→ _on_next_kp erzeugt skelet:
+    -> Idee: Neues Bild ohne Skelet -> set keypoint -> on_next_kp -> Skelet erzeugen
+    -> Besser: Neues Bild -> Skelet erzeugen
+→ refactor toolkit (color / shape -> seperate)
 → QApplication nicht in Controller, sondern in app.py
+→  seperate shortcut / signal logic from app.py
+→ seperate signal logic from controller.py
 
 ## CONCEPTS
 

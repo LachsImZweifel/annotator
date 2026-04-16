@@ -10,9 +10,11 @@ class App(QMainWindow):
     next_img: pyqtSignal = pyqtSignal()
     prev_img: pyqtSignal = pyqtSignal()
     get_img: pyqtSignal = pyqtSignal(int) #TODO implement
-    point_clicked: pyqtSignal = pyqtSignal(object)
+    set_kp: pyqtSignal = pyqtSignal(object)
     next_kp: pyqtSignal = pyqtSignal()
     prev_kp: pyqtSignal = pyqtSignal()
+    remove_kp: pyqtSignal = pyqtSignal()
+    skeleton_index: pyqtSignal = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -56,18 +58,32 @@ class App(QMainWindow):
         self.next_keypoint_shortcut = QShortcut(Qt.Key.Key_Q, self)
         self.next_keypoint_shortcut.activated.connect(self.prev_kp.emit)
 
-    # W KEY -> ENABLE SET KEYPOINTS
+        # R Key -> Remove Keypoint
+        self.remove_kp_shortcut = QShortcut(Qt.Key.Key_R, self)
+        self.remove_kp_shortcut.activated.connect(self.remove_kp.emit)
+
+        # W KEY -> ENABLE SET KEYPOINTS = keyPressEvent
+
+        # 1 - 9 -> SET TRACKING ID / NAVIGATE SKELETONS
+
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_W:
             self._annotation_view.set_kp_mode(True)
+        if Qt.Key.Key_1 <= event.key() <= Qt.Key.Key_9:
+            number = event.key() - Qt.Key.Key_0
+            self.skeleton_index.emit(number)
+
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key.Key_W:
             self._annotation_view.set_kp_mode(False)
 
     ########### Signal handlers ##########
     def _point_clicked(self, keypoint: Keypoint):
-        self.point_clicked.emit(keypoint)
+        self.set_kp.emit(keypoint)
 
     ########### Function Calls ##########
-    def new_image(self, image_data: ImageGUI, keypoints: KeypointsCOCO):
-        self._annotation_view.new_image(image_data, keypoints)
+    def new_image(self, image_data: ImageGUI):
+        self._annotation_view.set_image(image_data)
+
+    def new_data(self, keypoints: KeypointsCOCO):
+        self._annotation_view.draw_keypoints(keypoints)

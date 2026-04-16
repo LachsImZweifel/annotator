@@ -1,6 +1,6 @@
-from PyQt6.QtCore import Qt, pyqtSignal, QPointF, QPoint
+from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QGraphicsView, QGraphicsItemGroup
+from PyQt6.QtWidgets import QGraphicsView
 
 from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO
 from src.utils.gui_toolkit import draw_keypoint
@@ -26,10 +26,6 @@ class AnnotationView(QGraphicsView):
         self.setCursor(Qt.CursorShape.CrossCursor)
 
     ####### Custom methods #######
-    def new_image(self, image_data: ImageGUI, keypoints: KeypointsCOCO):
-        self.set_image(image_data)
-        self.draw_keypoints(keypoints)
-
     def set_image(self, image_data: ImageGUI):
         q_img = QImage(
             image_data.data,
