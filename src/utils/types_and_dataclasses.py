@@ -1,11 +1,9 @@
 from typing import Tuple, List, Literal
 from dataclasses import dataclass
 
-SkeletonCOCO = List[Tuple[int, int, int]]
-KeypointsCOCO = List[SkeletonCOCO]
-
+Keypoint = Tuple[int, int, int]
+KeypointsCOCO = List[List[Keypoint]]
 Shapes = Literal["triangle_up", "triangle_down", "x", "text"]
-
 
 @dataclass
 class ImageGUI:
