@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 from PyQt6.QtGui import QImage, QPixmap
 from PyQt6.QtWidgets import QGraphicsView
 
-from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO
+from src.utils.types_and_dataclasses import ImageGUI, SkeletonsData
 from src.utils.gui_toolkit import draw_keypoint
 from src.config import KEYPOINT_SIZE
 
@@ -40,9 +40,9 @@ class AnnotationView(QGraphicsView):
         self.setSceneRect(self._frame_obj.boundingRect())
         self.update_image_scale(self._frame_obj)
 
-    def draw_keypoints(self, keypoints: KeypointsCOCO):
-        for keypoint_list in keypoints:
-            for i, keypoint in enumerate(keypoint_list):
+    def draw_keypoints(self, skeletons_data: SkeletonsData):
+        for skeleton_data in skeletons_data:
+            for i, keypoint in enumerate(skeleton_data):
                 self._scene.addItem(draw_keypoint(
                     i,
                     (keypoint[0], keypoint[1]),

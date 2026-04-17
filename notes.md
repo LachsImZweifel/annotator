@@ -4,7 +4,9 @@
 →  add visibility to keypoints
 
 ### TODOS
-→  set Image (flexible)
+-> saving performance edit vs dump
+→ set Image (flexible)
+→ Änderungen werfen → nur cache löschen z.B. [strg] + [esc]
 
 ### REFACTORING
 → _on_next_kp erzeugt skelet:
@@ -14,6 +16,7 @@
 → QApplication nicht in Controller, sondern in app.py
 →  seperate shortcut / signal logic from app.py
 → seperate signal logic from controller.py
+-> keypoints -> skeletons_data
 
 ## CONCEPTS
 

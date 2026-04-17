@@ -2,7 +2,7 @@ from typing import Tuple, List, Literal
 from dataclasses import dataclass
 
 Keypoint = Tuple[int, int, int]
-KeypointsCOCO = List[List[Keypoint]]
+SkeletonsData = List[List[Keypoint]]
 Shapes = Literal["triangle_up", "triangle_down", "x", "text"]
 
 @dataclass
@@ -22,14 +22,14 @@ class ImageCOCO:
     license: int
 
 @dataclass
-class Annotation:
+class AnnotationCOCO:
     id: int
     image_id: int
     category_id: int
     num_keypoints: int
-    keypoints: List[Tuple[int, int, int]]
+    keypoints: List[int]
     bbox: Tuple[int, int, int, int]
-    area: int
+    area: float
     iscrowd: 0 | 1
 
 

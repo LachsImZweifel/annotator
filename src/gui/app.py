@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QGraphicsScene, QMainWindow
 from PyQt6.QtGui import QShortcut
 from PyQt6.QtCore import Qt, pyqtSignal
 
-from src.utils.types_and_dataclasses import ImageGUI, KeypointsCOCO, Keypoint
+from src.utils.types_and_dataclasses import ImageGUI, SkeletonsData, Keypoint
 from src.gui.annotation_view import AnnotationView
 
 
@@ -70,7 +70,7 @@ class App(QMainWindow):
         if event.key() == Qt.Key.Key_W:
             self._annotation_view.set_kp_mode(True)
         if Qt.Key.Key_1 <= event.key() <= Qt.Key.Key_9:
-            number = event.key() - Qt.Key.Key_0
+            number = (event.key() - Qt.Key.Key_0) -1
             self.skeleton_index.emit(number)
 
     def keyReleaseEvent(self, event):
@@ -85,5 +85,5 @@ class App(QMainWindow):
     def new_image(self, image_data: ImageGUI):
         self._annotation_view.set_image(image_data)
 
-    def new_data(self, keypoints: KeypointsCOCO):
+    def new_data(self, keypoints: SkeletonsData):
         self._annotation_view.draw_keypoints(keypoints)
