@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, pyqtSignal, QPointF
 from PyQt6.QtGui import QImage, QPixmap
-from PyQt6.QtWidgets import QGraphicsView
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsItem, QGraphicsItemGroup
 
 from src.utils.types_and_dataclasses import ImageGUI, SkeletonsData
 from src.utils.gui_toolkit import draw_keypoint
@@ -22,8 +22,9 @@ class AnnotationView(QGraphicsView):
         self._pan_start = None
         self._enable_keypoints = False
 
-        # design
+        # visual
         self.setCursor(Qt.CursorShape.CrossCursor)
+        self._kp_group = None
 
     ####### Custom methods #######
     def set_image(self, image_data: ImageGUI):
@@ -41,14 +42,17 @@ class AnnotationView(QGraphicsView):
         self.update_image_scale(self._frame_obj)
 
     def draw_keypoints(self, skeletons_data: SkeletonsData):
+        self._prepare_keypoints()
+
         for skeleton_data in skeletons_data:
             for i, keypoint in enumerate(skeleton_data):
-                self._scene.addItem(draw_keypoint(
+                item = draw_keypoint(
                     i,
                     (keypoint[0], keypoint[1]),
                     visibility=keypoint[2],
                     size=KEYPOINT_SIZE
-                ))
+                )
+                self._kp_group.addToGroup(item)
 
     def _zoom(self, coordinates: QPointF, factor=10):
         self.scale(factor, factor)
@@ -82,6 +86,14 @@ class AnnotationView(QGraphicsView):
             self._zoom(self.mapToScene(event.pos()))
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
         super().mousePressEvent(event)
+
+    def _prepare_keypoints(self):
+        if self._kp_group is not None:
+            self._scene.removeItem(self._kp_group)
+            self._kp_group = None
+        self._kp_group = QGraphicsItemGroup()
+        self._kp_group.setZValue(10)
+        self._scene.addItem(self._kp_group)
 
     ####### Signal handlers #######
     def _emit_click(self, event_pos: QPointF, visibility=None):

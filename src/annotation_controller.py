@@ -45,14 +45,14 @@ class AnnotationController:
     def _set_index(self, index):
         self._img_index = max(0, min(index, self._input_handler.total_frames))
 
-    def _create_skeletons(self, index = None, keypoints: Optional[SkeletonsData] = None):
-        if keypoints is None:
+    def _create_skeletons(self, index = None, skeleton_data: Optional[SkeletonsData] = None):
+        if skeleton_data is None or []:
             skeleton_index = index or self._skeleton_index
             self._skeletons = [Skeleton(skeleton_index, self._img_index, 1, len(KEYPOINTS))]
             self._skeleton_index = len(self._skeletons) - 1
         else:
             self._skeletons = []
-            for skeleton_data in keypoints:
+            for skeleton_data in skeleton_data:
                 skeleton =Skeleton(self._skeleton_index, self._img_index, 1, len(KEYPOINTS))
                 skeleton.load_keypoints(skeleton_data)
                 self._skeletons.append(skeleton)
@@ -61,9 +61,9 @@ class AnnotationController:
     ########### HANDLE NEXT IMAGE ##############
 
     def _handle_next_image(self):
-        if self._img_index > 0: self._annotation_cache.save_image_data(self._skeletons)
+        if self._img_index > 0: self._annotation_cache.save_image_data(self._img_index ,self._skeletons)
         self._set_new_image()
-        self._update_image_data()
+        self._load_image_data()
         self._display_image_data()
 
     def _set_new_image(self):
@@ -77,9 +77,13 @@ class AnnotationController:
         keypoints: SkeletonsData = [skeleton.get_keypoints() for skeleton in self._skeletons]
         self._gui.new_data(keypoints)
 
-    def _update_image_data(self):
-        annotations = self._annotation_cache.get_keypoints(self._img_index)
-        self._create_skeletons(annotations)
+    def _load_image_data(self):
+        skeleton_dict = self._annotation_cache.get_annotations(self._img_index)
+        self._skeletons = []
+        for track_id, keypoints in skeleton_dict:
+            loaded_skeleton = Skeleton(track_id, self._img_index, 1, len(KEYPOINTS))
+            loaded_skeleton.load_keypoints(keypoints)
+            self._skeletons.append(loaded_skeleton)
 
     ######## SIGNAL HANDLERS ########
     def _on_next_img(self):
@@ -95,7 +99,8 @@ class AnnotationController:
         self._handle_next_image()
 
     def _on_set_kp(self, keypoint: Keypoint):
-        print(self._skeleton_index)
+        print(f"Skeleton List: {len(self._skeletons)}")
+        print(f"Skeleton Index: {self._skeleton_index}")
         self._skeletons[self._skeleton_index].set_keypoint(keypoint)
 
     def _on_next_kp(self):

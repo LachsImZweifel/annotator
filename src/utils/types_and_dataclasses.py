@@ -26,6 +26,7 @@ class AnnotationCOCO:
     id: int
     image_id: int
     category_id: int
+    track_id: int
     num_keypoints: int
     keypoints: List[int]
     bbox: Tuple[int, int, int, int]

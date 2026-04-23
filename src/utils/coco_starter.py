@@ -1,7 +1,7 @@
 from datetime import date
 from typing import Dict, Any
 
-from src.config import KEYPOINTS, SKELETON, LICENSE
+from src.config import KEYPOINTS, SKELETON_COCO, LICENSE
 
 today = date.today()
 
@@ -22,7 +22,7 @@ coco: Dict[str, Any] = {
           "name": "swimmer",
           "supercategory": "human",
           "keypoints": KEYPOINTS,
-          "skeleton": SKELETON,
+          "skeleton": SKELETON_COCO,
         }
       ],
 

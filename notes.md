@@ -4,7 +4,9 @@
 →  add visibility to keypoints
 
 ### TODOS
+-> clear keypoints (annotation view)
 -> saving performance edit vs dump
+-> when a skeleton has only null/ (0,0,0) keypoints -> dont save
 → set Image (flexible)
 → Änderungen werfen → nur cache löschen z.B. [strg] + [esc]
 

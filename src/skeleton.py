@@ -79,3 +79,6 @@ class Skeleton:
         height = max(y_coords) - y_min
         return x_min, y_min, width, height
 
+    def is_empty(self) -> bool:
+        return all(kp is None or kp[2] == 0 for kp in self.keypoints)
+
