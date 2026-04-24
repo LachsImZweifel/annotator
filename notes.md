@@ -5,8 +5,10 @@
 
 ### TODOS
 -> clear keypoints (annotation view)
+-> sollten skeletons gelöscht werden oder nur keypoints? (tracking)
 -> saving performance edit vs dump
 -> when a skeleton has only null/ (0,0,0) keypoints -> dont save
+-> skeleton index auf max tracking_id + 1 begrenzen
 → set Image (flexible)
 → Änderungen werfen → nur cache löschen z.B. [strg] + [esc]
 

@@ -1,8 +1,8 @@
 import sys
-from typing import Optional
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication
 
+from src import skeleton
 from src.config import KEYPOINTS
 from src.utils.types_and_dataclasses import Keypoint, SkeletonsData
 from src.input_handler import InputHandler
@@ -31,10 +31,10 @@ class AnnotationController:
         self._gui.next_kp.connect(self._on_next_kp)
         self._gui.prev_kp.connect(self._on_prev_kp)
         self._gui.remove_kp.connect(self._on_remove_kp)
-
         self._gui.skeleton_index.connect(self._on_skeleton_index)
 
-        # Run
+        # Setup
+        self._initialize_skeletons()
         self._handle_next_image()
         self._run_gui()
 
@@ -42,21 +42,25 @@ class AnnotationController:
         self._gui.show()
         sys.exit(self._app.exec())
 
-    def _set_index(self, index):
+    def _initialize_skeletons(self):
+        for i in range(self._annotation_cache.highest_track_id):
+            self._skeletons.append(Skeleton(i, self._img_index, 1, len(KEYPOINTS)))
+
+    def set_img_index(self, index):
         self._img_index = max(0, min(index, self._input_handler.total_frames))
 
-    def _create_skeletons(self, index = None, skeleton_data: Optional[SkeletonsData] = None):
-        if skeleton_data is None or []:
-            skeleton_index = index or self._skeleton_index
-            self._skeletons = [Skeleton(skeleton_index, self._img_index, 1, len(KEYPOINTS))]
-            self._skeleton_index = len(self._skeletons) - 1
+    def _set_skeleton_index(self, index: int):
+        if index > self._skeleton_index + 1:
+            print("Index out of range")
+            print(f"Skeleton idx >>> {self._skeleton_index}")
+            pass
+        elif index == self._skeleton_index + 1:
+            self._skeleton_index = index
+            print(f"Skeleton idx >>> {self._skeleton_index}")
         else:
-            self._skeletons = []
-            for skeleton_data in skeleton_data:
-                skeleton =Skeleton(self._skeleton_index, self._img_index, 1, len(KEYPOINTS))
-                skeleton.load_keypoints(skeleton_data)
-                self._skeletons.append(skeleton)
-                self._skeleton_index = len(self._skeletons) - 1
+            self._skeleton_index = index
+            print(f"Skeleton idx >>> {self._skeleton_index}")
+
 
     ########### HANDLE NEXT IMAGE ##############
 
@@ -64,6 +68,7 @@ class AnnotationController:
         if self._img_index > 0: self._annotation_cache.save_image_data(self._img_index ,self._skeletons)
         self._set_new_image()
         self._load_image_data()
+        self._clear_data()
         self._display_image_data()
 
     def _set_new_image(self):
@@ -77,36 +82,43 @@ class AnnotationController:
         keypoints: SkeletonsData = [skeleton.get_keypoints() for skeleton in self._skeletons]
         self._gui.new_data(keypoints)
 
+    def _clear_data(self):
+        for skeleton in self._skeletons:
+            skeleton.clear_keypoints()
+
     def _load_image_data(self):
         skeleton_dict = self._annotation_cache.get_annotations(self._img_index)
-        self._skeletons = []
-        for track_id, keypoints in skeleton_dict:
-            loaded_skeleton = Skeleton(track_id, self._img_index, 1, len(KEYPOINTS))
-            loaded_skeleton.load_keypoints(keypoints)
-            self._skeletons.append(loaded_skeleton)
+        for track_id, keypoints in skeleton_dict.items():
+            self._skeletons[track_id].load_keypoints(keypoints)
 
     ######## SIGNAL HANDLERS ########
     def _on_next_img(self):
-        self._set_index(self._img_index + 1)
+        self.set_img_index(self._img_index + 1)
         self._handle_next_image()
 
     def _on_prev_img(self):
-        self._set_index(self._img_index - 1)
+        self.set_img_index(self._img_index - 1)
         self._handle_next_image()
 
     def _on_get_img(self, index):
-        self._set_index(index)
+        self.set_img_index(index)
         self._handle_next_image()
 
     def _on_set_kp(self, keypoint: Keypoint):
-        print(f"Skeleton List: {len(self._skeletons)}")
-        print(f"Skeleton Index: {self._skeleton_index}")
+        if self._skeleton_index >= len(self._skeletons):
+            self._skeletons.append(Skeleton(self._skeleton_index, self._img_index, 1, len(KEYPOINTS)))
+        print(f"Index: {self._skeleton_index}")
+        print(f"skeletons: {self._skeletons}")
         self._skeletons[self._skeleton_index].set_keypoint(keypoint)
 
     def _on_next_kp(self):
+        if self._skeleton_index >= len(self._skeletons):
+            self._skeletons.append(Skeleton(self._skeleton_index, self._img_index, 1, len(KEYPOINTS)))
         self._skeletons[self._skeleton_index].next_keypoint()
 
     def _on_prev_kp(self):
+        if self._skeleton_index >= len(self._skeletons):
+            self._skeletons.append(Skeleton(self._skeleton_index, self._img_index, 1, len(KEYPOINTS)))
         self._skeletons[self._skeleton_index].prev_keypoint()
 
     def _on_remove_kp(self):
@@ -114,17 +126,7 @@ class AnnotationController:
 
     def _on_skeleton_index(self, index):
         self._skeletons[self._skeleton_index].finish()
-
-        if index > self._skeleton_index + 1:
-            print("Index out of range")
-            pass
-        elif index == self._skeleton_index + 1:
-            print("Creating new skeleton")
-            self._skeleton_index = index
-            self._create_skeletons()
-        else:
-            print("Switching to existing skeleton")
-            self._skeleton_index = index
+        self._set_skeleton_index(index)
 
 
 

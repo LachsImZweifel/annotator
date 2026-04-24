@@ -14,7 +14,7 @@ class ImageGUI:
     channels: int
 
 @dataclass
-class ImageCOCO:
+class ImageMeta:
     id: int
     file_name: str
     width: int
@@ -22,7 +22,7 @@ class ImageCOCO:
     license: int
 
 @dataclass
-class AnnotationCOCO:
+class Annotation:
     id: int
     image_id: int
     category_id: int

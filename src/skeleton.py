@@ -52,7 +52,6 @@ class Skeleton:
             for kp in self.keypoints
         ]
 
-
     def get_keypoints_flattened(self) -> list[int]:
         flattened = []
         for kp in self.keypoints:
@@ -67,6 +66,9 @@ class Skeleton:
             (0, 0, 0) if kp is None else kp
             for kp in self.keypoints
         ]
+
+    def clear_keypoints(self):
+        self.keypoints = [None] * self.num_keypoints
 
     def calc_bbox(self) -> tuple[int, int, int, int]:
         x_coords = [kp[0] for kp in self.keypoints if kp is not None and kp[2] > 0]
