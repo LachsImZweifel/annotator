@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 from PyQt6.QtWidgets import QApplication
 
-from src import skeleton
 from src.config import KEYPOINTS
 from src.utils.types_and_dataclasses import Keypoint, SkeletonsData
 from src.input_handler import InputHandler
@@ -65,7 +64,7 @@ class AnnotationController:
     ########### HANDLE NEXT IMAGE ##############
 
     def _handle_next_image(self):
-        if self._img_index > 0: self._annotation_cache.save_image_data(self._img_index ,self._skeletons)
+        if self._img_index > 0: self._annotation_cache.save_image_data(self._skeletons)
         self._set_new_image()
         self._load_image_data()
         self._clear_data()

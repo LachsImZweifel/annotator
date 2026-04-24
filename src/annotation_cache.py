@@ -30,8 +30,8 @@ class AnnotationCache:
         """ Coco -> Python convertion !!! """
         indexed_annotations = defaultdict(list)
         for annotation_coco in self._data_coco["annotations"]:
-            annotation_py = annotation_to_py(annotation_coco)
-            indexed_annotations[annotation_py.track_id].append(annotation_py)
+            annotation_py = annotation_to_py(Annotation(**annotation_coco))
+            indexed_annotations[annotation_py.track_id].append(annotation_py.__dict__)
             self._total_annotations += 1
             self.highest_track_id = max(annotation_coco["track_id"], self.highest_track_id)
 
