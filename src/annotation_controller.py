@@ -64,11 +64,20 @@ class AnnotationController:
     ########### HANDLE NEXT IMAGE ##############
 
     def _handle_next_image(self):
-        if self._img_index > 0: self._annotation_cache.save_image_data(self._skeletons)
+        self._save_data()
+        self._clear_data()
         self._set_new_image()
         self._load_image_data()
-        self._clear_data()
         self._display_image_data()
+
+    def _save_data(self):
+        if self._img_index > 0:
+            skeletons_to_save = [skeleton for skeleton in self._skeletons if not skeleton.is_empty()]
+            self._annotation_cache.save_data(skeletons_to_save)
+
+    def _clear_data(self):
+        for skeleton in self._skeletons:
+            skeleton.clear_keypoints()
 
     def _set_new_image(self):
         new_img = self._input_handler.new_image(self._img_index)
@@ -77,18 +86,15 @@ class AnnotationController:
             self._annotation_cache.set_image(name, self._img_index, image)
             self._gui.new_image(image)
 
-    def _display_image_data(self):
-        keypoints: SkeletonsData = [skeleton.get_keypoints() for skeleton in self._skeletons]
-        self._gui.new_data(keypoints)
-
-    def _clear_data(self):
-        for skeleton in self._skeletons:
-            skeleton.clear_keypoints()
-
     def _load_image_data(self):
         skeleton_dict = self._annotation_cache.get_annotations(self._img_index)
         for track_id, keypoints in skeleton_dict.items():
             self._skeletons[track_id].load_keypoints(keypoints)
+
+    def _display_image_data(self):
+        keypoints: SkeletonsData = [skeleton.get_keypoints() for skeleton in self._skeletons]
+        self._gui.new_data(keypoints)
+
 
     ######## SIGNAL HANDLERS ########
     def _on_next_img(self):

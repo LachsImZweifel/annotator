@@ -13,6 +13,7 @@
 → Änderungen werfen → nur cache löschen z.B. [strg] + [esc]
 
 ### REFACTORING
+-> py_annotations -> annotation = py_annotations["image_id]["track_id"] >>> Rettung der save skeleton funktion
 → _on_next_kp erzeugt skelet:
     -> Idee: Neues Bild ohne Skelet -> set keypoint -> on_next_kp -> Skelet erzeugen
     -> Besser: Neues Bild -> Skelet erzeugen
